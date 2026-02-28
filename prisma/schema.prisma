@@ -1,0 +1,180 @@
+
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+
+
+model User {
+  id           String      @id @default(uuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  role         Role        @default(ADMIN)
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  events       UserEvent[]
+
+  @@map("users")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+}
+
+
+model UserEvent {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventId])
+  @@map("user_events")
+}
+
+
+model Event {
+  id          String      @id @default(uuid())
+  name        String
+  type        EventType
+  description String?
+  slug        String      @unique
+  status      EventStatus @default(ACTIVE)
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  admins      UserEvent[]
+  items       Item[]
+  config      EventConfig?
+
+  @@map("events")
+}
+
+enum EventType {
+  UNIVERSITY
+  FESTIVAL
+  CONFERENCE
+  SPORTS
+  OTHER
+}
+
+enum EventStatus {
+  ACTIVE
+  EXPIRED
+  ARCHIVED
+}
+
+model EventConfig {
+  id                        String  @id @default(uuid())
+  eventId                   String  @unique
+  event                     Event   @relation(fields: [eventId], references: [id])
+  requirePhoto              Boolean @default(true)
+  itemExpiryDays            Int?
+  allowClaimWithoutVerification Boolean @default(true)
+  notifyOnClaim             Boolean @default(true)
+  primaryColor              String?
+  logoUrl                   String?
+
+  @@map("event_configs")
+}
+
+
+model Item {
+  id            String     @id @default(uuid())
+  name          String
+  category      Category
+  locationFound String
+  photoUrl      String
+  status        ItemStatus @default(UNCLAIMED)
+  expiresAt     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  eventId       String
+  event         Event      @relation(fields: [eventId], references: [id])
+  claims        Claim[]
+
+  @@map("items")
+}
+
+enum Category {
+  ELECTRONICS
+  CLOTHING
+  DOCUMENTS
+  ACCESSORIES
+  OTHER
+}
+
+enum ItemStatus {
+  UNCLAIMED
+  CLAIMED
+  REUNITED
+  EXPIRED
+}
+
+
+model Claim {
+  id             String        @id @default(uuid())
+  claimerName    String
+  claimerContact String
+  ownershipProof String
+  status         ClaimStatus   @default(PENDING)
+  adminNote      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  itemId         String
+  item           Item          @relation(fields: [itemId], references: [id])
+  notifications  Notification[]
+
+  @@map("claims")
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+
+
+model Notification {
+  id        String             @id @default(uuid())
+  type      NotificationType
+  recipient String
+  message   String
+  status    NotificationStatus @default(PENDING)
+  sentAt    DateTime?
+  createdAt DateTime           @default(now())
+
+  claimId   String?
+  claim     Claim?             @relation(fields: [claimId], references: [id])
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  CLAIM_SUBMITTED
+  CLAIM_APPROVED
+  CLAIM_REJECTED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
