@@ -46,16 +46,19 @@ getClaimsByItem: async (req: Request, res: Response) => {
     }
   },
 
-  approveClaim: async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const { adminNote } = req.body;
-      const claim = await claimService.approveClaim(id, adminNote);
-      return res.status(200).json(claim);
-    } catch (error: any) {
-      return res.status(400).json({ message: error.message });
-    }
-  },
+approveClaim: async (req: any, res: Response) => {
+  try {
+    const { id } = req.params;
+    // const { adminNote } = req.body;
+    const adminNote = 'Approve'
+    const adminEmail = req.user!.email;
+    
+    const claim = await claimService.approveClaim(id, adminNote, adminEmail);
+    return res.status(200).json(claim);
+  } catch (error: any) {
+    return res.status(400).json({ message: error.message });
+  }
+},
 
   rejectClaim: async (req: Request, res: Response) => {
     try {
