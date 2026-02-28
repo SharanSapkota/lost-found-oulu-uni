@@ -5,16 +5,16 @@ import { itemRepository } from "../repositories/item.repository";
 // NEW - correct for Prisma v6+
 export const itemService = {
 
-  getItemsByEvent: async (eventSlug: any, filters?: {
+  getItemsByEvent: async (eventId: any, filters?: {
     category?: any;
     status?: any;
     search?: string;
     page?: number;
     limit?: number;
   }) => {
-    const event = await eventRepository.findBySlug(eventSlug);
-    if (!event) throw new Error("Event not found");
-    return itemRepository.findAllByEvent(event.id, filters);
+    // const event = await eventRepository.findBySlug(eventSlug);
+    // if (!event) throw new Error("Event not found");
+    return itemRepository.findAllByEvent(eventId, filters);
   },
   
   editItem: async (id: any, data: {
