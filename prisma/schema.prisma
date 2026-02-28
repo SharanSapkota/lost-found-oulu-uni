@@ -132,6 +132,7 @@ model Claim {
   claimerName    String
   claimerContact String
   ownershipProof String
+  pickupCode     String?     @unique  
   status         ClaimStatus   @default(PENDING)
   adminNote      String?
   createdAt      DateTime      @default(now())
