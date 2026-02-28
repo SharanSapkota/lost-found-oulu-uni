@@ -6,9 +6,10 @@ export const itemController = {
 
   getItemsByEvent: async (req: Request, res: Response) => {
     try {
-      const { slug } = req.params;
+      const params = req.params;
+
       const { category, status, search, page, limit } = req.query;
-      const items = await itemService.getItemsByEvent(slug, {
+      const items = await itemService.getItemsByEvent(params.eventId, {
         category: category as string,
         status: status as string,
         search: search as string,
