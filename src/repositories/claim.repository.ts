@@ -50,12 +50,21 @@ hasApprovedClaim: async (itemId: string) => {
   return !!approved;
 },
 
-  updateStatus: async (id: string, status: any, adminNote?: string) => {
-    return prisma.claim.update({
-      where: { id },
-      data: { status, ...(adminNote && { adminNote }) },
-      include: { item: true },
-    });
-  },
+updateStatus: async (
+  id: string,
+  status: string,
+  adminNote?: string,
+  pickupCode?: string
+) => {
+  return prisma.claim.update({
+    where: { id },
+    data: {
+      status: status as any,
+      ...(adminNote && { adminNote }),
+      ...(pickupCode && { pickupCode }),
+    },
+    include: { item: { include: { event: true } } },
+  });
+},
 
 };
