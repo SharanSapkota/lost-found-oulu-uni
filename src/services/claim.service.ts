@@ -2,6 +2,9 @@ import { claimRepository } from "../repositories/claim.repository";
 import { itemRepository } from "../repositories/item.repository";
 import { notificationRepository } from "../repositories/notification.repository";
 import { NotificationType, ClaimStatus, ItemStatus } from "../constants/enums";
+import { generatePickupCode } from "../utils/pickupCode";
+import { emailService } from "./email.service";
+
 export const claimService = {
 
   getClaimsByEvent: async (eventId: any, filters?: { status?: any }) => {
@@ -39,23 +42,54 @@ getClaimById: async (id: any) => {
     return claim;
   },
 
-  approveClaim: async (claimId: any, adminNote?: string) => {
+
+approveClaim: async (claimId: string, adminNote?: string, adminEmail?: string) => {
   const claim = await claimRepository.findById(claimId);
   if (!claim) throw new Error("Claim not found");
-  if (claim.status !== ClaimStatus.PENDING) throw new Error("Claim is no longer pending");
+  if (claim.status !== "PENDING") throw new Error("Claim is no longer pending");
 
   const alreadyApproved = await claimRepository.hasApprovedClaim(claim.itemId);
   if (alreadyApproved) throw new Error("This item already has an approved claim");
 
-  const updated = await claimRepository.updateStatus(claimId, ClaimStatus.APPROVED, adminNote);
-  await itemRepository.updateStatus(claim.itemId, ItemStatus.CLAIMED);
+  const pickupCode = generatePickupCode();
+
+  const updated = await claimRepository.updateStatus(
+    claimId,
+    "APPROVED",
+    adminNote,
+    pickupCode
+  );
+
+  await itemRepository.updateStatus(claim.itemId, "CLAIMED");
+
+  const isEmail = claim.claimerContact.includes("@");
+
+  if (isEmail) {
+    await emailService.sendPickupCode({
+      to: claim.claimerContact,
+      claimerName: claim.claimerName,
+      itemName: claim.item.name,
+      pickupCode,
+      eventName: claim.item.event.name,
+    });
+  }
 
   await notificationRepository.create({
-    type: NotificationType.CLAIM_APPROVED,
+    type: "CLAIM_APPROVED",
     recipient: claim.claimerContact,
-    message: `Your claim for "${claim.item.name}" has been approved. Please come to collect it.`,
+    message: `Your claim for "${claim.item.name}" has been approved. Pickup code: ${pickupCode}`,
     claimId: claim.id,
   });
+
+   if (adminEmail) {
+    await emailService.sendClaimNotificationToAdmin({
+      to: adminEmail,
+      claimerName: claim.claimerName,
+      itemName: claim.item.name,
+      pickupCode,
+    });
+  }
+
 
   return updated;
 },
