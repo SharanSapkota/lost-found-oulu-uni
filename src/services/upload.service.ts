@@ -1,25 +1,35 @@
 import supabase from "../utils/supabase";
 import { v4 as uuidv4 } from "uuid";
-import path from "path";
+import sharp from "sharp";
 
 export const uploadService = {
 
   uploadItemPhoto: async (file: Express.Multer.File): Promise<string> => {
-    const ext = path.extname(file.originalname);
-    const filename = `${uuidv4()}${ext}`;
+    const compressed = await sharp(file.buffer)
+      .resize(800, 800, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .jpeg({
+        quality: 75,
+        progressive: true,
+      })
+      .toBuffer();
+
+    const filename = `${uuidv4()}.jpg`;
     const filePath = `items/${filename}`;
 
     const { error } = await supabase.storage
       .from("lostfound")
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
+      .upload(filePath, compressed, {
+        contentType: "image/jpeg",
         upsert: false,
       });
 
     if (error) throw new Error(`Upload failed: ${error.message}`);
 
     const { data } = supabase.storage
-      .from("lostfound")
+      .from("lostfound") 
       .getPublicUrl(filePath);
 
     return data.publicUrl;
@@ -28,7 +38,7 @@ export const uploadService = {
   deleteItemPhoto: async (photoUrl: string): Promise<void> => {
     try {
       const url = new URL(photoUrl);
-      const parts = url.pathname.split("/items/");
+      const parts = url.pathname.split("/lostfound/"); 
       if (parts.length < 2) return;
 
       const filePath = `items/${parts[1]}`;
