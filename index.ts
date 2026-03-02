@@ -8,6 +8,7 @@ import userRoutes from "./src/routes/user.routes";
 import eventRoutes from "./src/routes/event.routes";
 import itemRoutes from "./src/routes/item.routes";
 import claimRoutes from "./src/routes/claim.routes";
+import prisma  from './prisma/prismaClient'
 
 dotenv.config();
 
@@ -17,7 +18,14 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: process.env.FRONTEND_URL }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+async function main() {
+  await prisma.$connect()
+  console.log(' Database connected successfully')
+  
+  // rest of your app setup
+}
 
+main().catch(console.error)
 // app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Routes
