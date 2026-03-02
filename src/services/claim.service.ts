@@ -31,7 +31,6 @@ getClaimById: async (id: any) => {
 
     const claim = await claimRepository.create({ ...data, itemId });
 
-    // Log notification (actual sending handled separately)
     await notificationRepository.create({
       type: NotificationType.CLAIM_SUBMITTED,
       recipient: data.claimerContact,
@@ -101,7 +100,6 @@ approveClaim: async (claimId: string, adminNote?: string, adminEmail?: string) =
 
     const updated = await claimRepository.updateStatus(claimId, ClaimStatus.REJECTED, adminNote);
 
-    // Log notification
     await notificationRepository.create({
       type: NotificationType.CLAIM_REJECTED,
       recipient: claim.claimerContact,

@@ -2,7 +2,6 @@ import { eventRepository } from "../repositories/event.repository";
 import { ItemStatus } from "../constants/enums";
 import { itemRepository } from "../repositories/item.repository";
 
-// NEW - correct for Prisma v6+
 export const itemService = {
 
   getItemsByEvent: async (eventId: any, filters?: {
