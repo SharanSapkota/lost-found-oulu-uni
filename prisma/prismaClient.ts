@@ -8,8 +8,6 @@ const pool = new Pool({
 });
 const adapter = new PrismaPg(pool);
 
-const DATABASE_URL = process.env.DATABASE_URL
-
  const prisma = new PrismaClient({
   adapter,
 });
