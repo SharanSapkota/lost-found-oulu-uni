@@ -1,5 +1,5 @@
 import prisma from "../utils/prisma";
-import "dotenv/config"; // loads .env
+import "dotenv/config"; 
 
 import { NotificationType, NotificationStatus } from "../constants/enums";
 export const notificationRepository = {

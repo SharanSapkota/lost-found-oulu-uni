@@ -1,5 +1,5 @@
 import { EventStatus, EventType } from "../constants/enums";
-import "dotenv/config"; // loads .env
+import "dotenv/config"; 
 
 import prisma from "../utils/prisma";
 

@@ -40,7 +40,6 @@ export const itemController = {
         return res.status(400).json({ message: "Photo is required" });
       }
 
-      // Upload to Supabase and get public URL
       const photoUrl = await uploadService.uploadItemPhoto(req.file);
 
       const item = await itemService.uploadItem(slug, {
@@ -78,7 +77,6 @@ export const itemController = {
     try {
       const { id } = req.params;
 
-      // Get item first to delete photo from storage
       const item = await itemService.getItemById(id);
       if (item?.photoUrl) {
         await uploadService.deleteItemPhoto(item.photoUrl);

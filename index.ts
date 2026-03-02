@@ -22,20 +22,17 @@ async function main() {
   await prisma.$connect()
   console.log(' Database connected successfully')
   
-  // rest of your app setup
 }
 
 main().catch(console.error)
 // app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admins", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/claims", claimRoutes);
 
-// Health check
 app.get("/", (req, res) => {
   res.json({ message: "OuluFound API running " });
 });

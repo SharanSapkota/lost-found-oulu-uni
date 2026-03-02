@@ -8,10 +8,8 @@ import { submitClaimSchema, reviewClaimSchema } from "../schemas/claim.schema";
 
 const router = Router();
 
-// Public — submit a claim
 router.post("/item/:itemId", validate(submitClaimSchema), claimController.submitClaim);
 
-// Admin + super admin
 router.get("/event/:eventId", authenticate, requireAdmin, requireEventScope, claimController.getClaimsByEvent);
 router.get("/item/:itemId", authenticate, requireAdmin, claimController.getClaimsByItem);
 router.get("/:id", authenticate, requireAdmin, claimController.getClaimById);
