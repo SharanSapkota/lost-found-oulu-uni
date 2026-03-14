@@ -8,8 +8,15 @@ export const itemController = {
     try {
       const params = req.params;
 
+      let key = 'slug'
+      if (params.eventId) {
+        key = 'eventId'
+      } 
+
       const { category, status, search, page, limit } = req.query;
-      const items = await itemService.getItemsByEvent(params.eventId, {
+      let findByValue = params?.slug || params?.eventId;
+
+      const items = await itemService.getItemsByEvent(findByValue, key, {
         category: category as string,
         status: status as string,
         search: search as string,

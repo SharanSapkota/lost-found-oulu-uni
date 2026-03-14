@@ -4,16 +4,25 @@ import { itemRepository } from "../repositories/item.repository";
 
 export const itemService = {
 
-  getItemsByEvent: async (eventId: any, filters?: {
+  getItemsByEvent: async (eventSlug: any, key: string, filters?: {
     category?: any;
     status?: any;
     search?: string;
     page?: number;
     limit?: number;
   }) => {
-    // const event = await eventRepository.findBySlug(eventSlug);
-    // if (!event) throw new Error("Event not found");
-    return itemRepository.findAllByEvent(eventId, filters);
+    let event: any = null;
+    let eventId: any = eventSlug;
+    
+    if (key.includes('slug')) {
+      event = await eventRepository.findBySlug(eventSlug);
+      if (!event) throw new Error("Event not found");
+      eventId = event.id;
+    } 
+
+    const items = await itemRepository.findAllByEvent(eventId, filters);
+
+    return items;
   },
   
   editItem: async (id: any, data: {

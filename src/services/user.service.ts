@@ -61,10 +61,8 @@ reassignAdmin: async (adminId: any, newEventId: any) => {
   const event = await eventRepository.findById(newEventId);
   if (!event) throw new Error("Event not found");
 
-  // Remove old assignment
   await prisma.userEvent.deleteMany({ where: { userId: adminId } });
 
-  // Assign to new event
   await userRepository.assignToEvent(adminId, newEventId);
 },
 
